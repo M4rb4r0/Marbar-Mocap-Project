@@ -1,0 +1,73 @@
+# Multicamera Motion Capture Configuration
+
+# Camera settings
+cameras:
+  num_cameras: 1  # Single camera to start, expand to multicamera later
+  resolution: [1280, 720]  # Width x Height (reduce for better performance)
+  fps: 30
+  camera_ids: [0]  # USB camera index or RTSP URL
+  
+# Calibration settings
+calibration:
+  pattern_type: "checkerboard"  # or "aruco"
+  checkerboard:
+    rows: 9  # Internal corners
+    cols: 6  # Internal corners
+    square_size: 0.025  # Size in meters (2.5cm)
+  min_samples: 30  # Minimum images for calibration
+  output_dir: "calibration/data"
+  
+# Detection settings
+detection:
+  body:
+    enabled: true
+    model: "mediapipe_pose"  # MediaPipe Pose (torso + arms)
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+  
+  hands:
+    enabled: true
+    model: "mediapipe_hands"  # MediaPipe Hands
+    max_num_hands: 2
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+  
+  face:
+    enabled: true
+    model: "mediapipe_face_mesh"  # MediaPipe Face Mesh
+    max_num_faces: 1
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+    refine_landmarks: true  # For better eye/lip tracking
+
+# 3D Reconstruction (disabled for single camera, will be 2D detections only)
+reconstruction:
+  enabled: false  # Enable when using multiple cameras
+  triangulation_method: "dlt"  # Direct Linear Transform
+  min_cameras_per_point: 2  # Minimum cameras to triangulate
+  reprojection_error_threshold: 10.0  # pixels
+  smoothing:
+    enabled: true
+    window_size: 5  # frames
+    filter_type: "median"  # or "gaussian", "kalman"
+
+# Output settings
+output:
+  save_raw_video: true
+  save_2d_detections: true
+  save_3d_reconstruction: false  # Not available with single camera
+  format: "json"  # or "bvh", "fbx" (requires additional libs)
+  output_dir: "data/recordings"
+  
+# Visualization
+visualization:
+  show_live_preview: true
+  preview_scale: 0.7  # Scale factor for display
+  show_3d_plot: false  # Disabled for single camera (2D overlay only)
+  plot_update_rate: 10  # Update every N frames
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  save_logs: true
+  log_dir: "logs"
