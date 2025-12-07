@@ -5,26 +5,34 @@ Facial expression detection using MediaPipe Face Mesh.
 import cv2
 import mediapipe as mp
 import numpy as np
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Union
+from .base_detector import BaseFaceDetector
 
 
-class FaceDetector:
+class MediaPipeFaceDetector(BaseFaceDetector):
     """Facial expression detection using MediaPipe Face Mesh."""
     
-    def __init__(self,
-                 max_num_faces: int = 1,
-                 min_detection_confidence: float = 0.5,
-                 min_tracking_confidence: float = 0.5,
-                 refine_landmarks: bool = True):
+    def __init__(self, config: Union[Dict, None] = None):
         """
-        Initializes the face detector.
+        Init face detector.
         
         Args:
-            max_num_faces: Maximum number of faces to detect
-            min_detection_confidence: Minimum confidence for initial detection
-            min_tracking_confidence: Minimum confidence for tracking
-            refine_landmarks: If True, refines eye and lip landmarks
+            config: Configuration dictionary. If None, default values are used.
+                   Expected keys:
+                   - max_num_faces (int): Maximum number of faces to detect
+                   - min_detection_confidence (float): Minimum detection confidence
+                   - min_tracking_confidence (float): Minimum tracking confidence
+                   - refine_landmarks (bool): Refine landmarks for eyes and lips
         """
+        if config is None:
+            config = {}
+        
+        # Extract parameters from config
+        max_num_faces = config.get('max_num_faces', 1)
+        min_detection_confidence = config.get('min_detection_confidence', 0.5)
+        min_tracking_confidence = config.get('min_tracking_confidence', 0.5)
+        refine_landmarks = config.get('refine_landmarks', True)
+        
         self.mp_face_mesh = mp.solutions.face_mesh
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
@@ -37,9 +45,9 @@ class FaceDetector:
             min_tracking_confidence=min_tracking_confidence
         )
         
-        # Important facial landmark indices for expressions
+        # Indices of important landmarks
         self.landmark_indices = {
-            # Face oval
+            # Face contour
             'face_oval': [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
                           397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
                           172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109],
@@ -302,5 +310,17 @@ class FaceDetector:
         return rvec, tvec
     
     def close(self):
-        """Libera recursos."""
+        """Releases resources."""
         self.face_mesh.close()
+    
+    def get_model_info(self) -> Dict:
+        """Returns information about the model."""
+        return {
+            'backend': 'mediapipe',
+            'model': 'face_mesh',
+            'version': mp.__version__
+        }
+
+
+# Alias for compatibility with existing code
+FaceDetector = MediaPipeFaceDetector

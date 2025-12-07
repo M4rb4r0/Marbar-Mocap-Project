@@ -21,24 +21,25 @@ calibration:
 detection:
   body:
     enabled: true
-    model: "mediapipe_pose"  # MediaPipe Pose (torso + arms)
+    backend: "mediapipe"  # Backend: mediapipe
+    model_complexity: 0  # MediaPipe BlazePose: 0 (lite - fastest), 1 (full), 2 (heavy - most accurate)
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
   
   hands:
     enabled: true
-    model: "mediapipe_hands"  # MediaPipe Hands
-    max_num_hands: 2
+    backend: "mediapipe"  # Backend: mediapipe
+    max_num_hands: 4
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
   
   face:
     enabled: true
-    model: "mediapipe_face_mesh"  # MediaPipe Face Mesh
-    max_num_faces: 1
+    backend: "mediapipe"  # Backend: mediapipe
+    max_num_faces: 2
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
-    refine_landmarks: true  # For better eye/lip tracking
+    refine_landmarks: true  # MediaPipe: Better eye/lip tracking
 
 # 3D Reconstruction (disabled for single camera, will be 2D detections only)
 reconstruction:
@@ -49,14 +50,14 @@ reconstruction:
   smoothing:
     enabled: true
     window_size: 5  # frames
-    filter_type: "median"  # or "gaussian", "kalman"
+    filter_type: "median"  # "median", "gaussian" or "kalman"
 
 # Output settings
 output:
   save_raw_video: true
   save_2d_detections: true
   save_3d_reconstruction: false  # Not available with single camera
-  format: "json"  # or "bvh", "fbx" (requires additional libs)
+  format: "json"  # "json", "bvh" or "fbx" (requires additional libs)
   output_dir: "data/recordings"
   
 # Visualization

@@ -1,0 +1,42 @@
+# Configuration for Real-time Motion Capture
+
+streaming:
+  enabled: true
+  protocol: "websocket"  # "websocket" or "udp"
+  host: "localhost"
+  port: 8765
+
+target_fps: 30  # Target frames per second for streaming
+compression: true
+send_only_changes: false
+
+data:
+  body: true
+  hands: true
+  face: true
+
+format: "unity"  # "unity", "unreal", "blender"
+coordinate_system: "unity" # "unity": Y-up, left-handed; "unreal": Z-up, left-handed; "blender": Z-up, right-handed
+
+
+smoothing:
+  enabled: true
+  method: "exponential"  # "exponential", "moving_average", "kalman"
+
+retarget:
+  enabled: false
+  target_skeleton: "mixamo"  # "mixamo", "unity_humanoid", "custom"
+  scale_factor: 1.0
+
+unity:
+  use_humanoid: true
+  apply_root_motion: false
+  mirror_pose: false
+
+unreal:
+  live_link_subject_name: "MocapStream"
+  use_control_rig: true
+
+blender:
+  auto_keyframe: false
+  keyframe_interval: 1

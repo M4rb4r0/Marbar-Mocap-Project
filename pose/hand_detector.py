@@ -5,24 +5,32 @@ Hands detector using MediaPipe Hands.
 import cv2
 import mediapipe as mp
 import numpy as np
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
+from .base_detector import BaseHandDetector
 
 
-class HandDetector:
-    """Hands detector using MediaPipe Hands."""
+class MediaPipeHandDetector(BaseHandDetector):
+    """Hands detection using MediaPipe Hands."""
     
-    def __init__(self,
-                 max_num_hands: int = 2,
-                 min_detection_confidence: float = 0.5,
-                 min_tracking_confidence: float = 0.5):
+    def __init__(self, config: Union[Dict, None] = None):
         """
-        Initializes the hand detector.
+        Init hands detector.
         
         Args:
-            max_num_hands: Maximum number of hands to detect
-            min_detection_confidence: Minimum confidence for initial detection
-            min_tracking_confidence: Minimum confidence for tracking
+            config: Configuration dictionary. If None, default values are used.
+                   Expected keys:
+                   - max_num_hands (int): Number of hands to detect
+                   - min_detection_confidence (float): Minimum detection confidence
+                   - min_tracking_confidence (float): Minimum tracking confidence
         """
+        if config is None:
+            config = {}
+        
+        # Extract parameters from config
+        max_num_hands = config.get('max_num_hands', 2)
+        min_detection_confidence = config.get('min_detection_confidence', 0.5)
+        min_tracking_confidence = config.get('min_tracking_confidence', 0.5)
+        
         self.mp_hands = mp.solutions.hands
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
@@ -34,7 +42,6 @@ class HandDetector:
             min_tracking_confidence=min_tracking_confidence
         )
         
-        # Names of hand landmarks (21 points)
         self.landmark_names = [
             'wrist',
             'thumb_cmc', 'thumb_mcp', 'thumb_ip', 'thumb_tip',
@@ -182,3 +189,15 @@ class HandDetector:
     def close(self):
         """Libera recursos."""
         self.hands.close()
+    
+    def get_model_info(self) -> Dict:
+        """Returns information of the model."""
+        return {
+            'backend': 'mediapipe',
+            'model': 'hands',
+            'version': mp.__version__
+        }
+
+
+# compability alias
+HandDetector = MediaPipeHandDetector

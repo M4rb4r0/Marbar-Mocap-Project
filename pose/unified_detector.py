@@ -5,9 +5,7 @@ Unified detector for body pose, hands, and face expressions.
 import cv2
 import numpy as np
 from typing import Optional, Dict
-from .body_detector import BodyDetector
-from .hand_detector import HandDetector
-from .face_detector import FaceDetector
+from .detector_factory import DetectorFactory
 
 
 class UnifiedDetector:
@@ -18,37 +16,28 @@ class UnifiedDetector:
         Initializes the unified detector.
         
         Args:
-            config: Configuration dictionary with settings for each detector
+            config: Configuration dictionary with settings for each detector.
+                   Each detector config should include 'enabled' and 'backend' keys.
         """
         self.config = config
         
-        # Initialize detectors based on configuration
+        # Initialize body detector
         body_cfg = config.get('body', {})
         self.body_detector = None
         if body_cfg.get('enabled', True):
-            self.body_detector = BodyDetector(
-                min_detection_confidence=body_cfg.get('min_detection_confidence', 0.5),
-                min_tracking_confidence=body_cfg.get('min_tracking_confidence', 0.5)
-            )
+            self.body_detector = DetectorFactory.create_body_detector(body_cfg)
         
+        # Initialize hand detector
         hands_cfg = config.get('hands', {})
         self.hand_detector = None
         if hands_cfg.get('enabled', True):
-            self.hand_detector = HandDetector(
-                max_num_hands=hands_cfg.get('max_num_hands', 2),
-                min_detection_confidence=hands_cfg.get('min_detection_confidence', 0.5),
-                min_tracking_confidence=hands_cfg.get('min_tracking_confidence', 0.5)
-            )
+            self.hand_detector = DetectorFactory.create_hand_detector(hands_cfg)
         
+        # Initialize face detector
         face_cfg = config.get('face', {})
         self.face_detector = None
         if face_cfg.get('enabled', True):
-            self.face_detector = FaceDetector(
-                max_num_faces=face_cfg.get('max_num_faces', 1),
-                min_detection_confidence=face_cfg.get('min_detection_confidence', 0.5),
-                min_tracking_confidence=face_cfg.get('min_tracking_confidence', 0.5),
-                refine_landmarks=face_cfg.get('refine_landmarks', True)
-            )
+            self.face_detector = DetectorFactory.create_face_detector(face_cfg)
     
     def detect(self, image: np.ndarray) -> Dict:
         """

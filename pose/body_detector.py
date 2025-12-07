@@ -1,25 +1,34 @@
-#Corporal Pose Detection Module using MediaPipe Pose.
+"""Body pose detection using MediaPipe Pose."""
+
 import cv2
 import mediapipe as mp
 import numpy as np
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Union
+from .base_detector import BaseBodyDetector
 
 
-class BodyDetector:
-#Corporal Pose Detection Module using MediaPipe Pose.
+class MediaPipeBodyDetector(BaseBodyDetector):
+    """Body pose detection using MediaPipe Pose."""
     
-    def __init__(self, 
-                 min_detection_confidence: float = 0.5,
-                 min_tracking_confidence: float = 0.5,
-                 model_complexity: int = 1):
+    def __init__(self, config: Union[Dict, None] = None):
         """
         Init pose detector.
         
         Args:
-            min_detection_confidence: Minimum confidence for initial detection
-            min_tracking_confidence: Minimum confidence for tracking
-            model_complexity: 0 (lite), 1 (full), 2 (heavy) - more accurate but slower
+            config: Configuration dictionary. If None, default values are used.
+                   Expected keys:
+                   - min_detection_confidence (float): Minimum detection confidence
+                   - min_tracking_confidence (float): Minimum tracking confidence
+                   - model_complexity (int): 0 (lite), 1 (full), 2 (heavy)
         """
+        if config is None:
+            config = {}
+        
+        # Extraer parámetros del config
+        min_detection_confidence = config.get('min_detection_confidence', 0.5)
+        min_tracking_confidence = config.get('min_tracking_confidence', 0.5)
+        model_complexity = config.get('model_complexity', 1)
+        
         self.mp_pose = mp.solutions.pose
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
@@ -175,3 +184,15 @@ class BodyDetector:
     def close(self):
         """Libera recursos."""
         self.pose.close()
+    
+    def get_model_info(self) -> Dict:
+        """Returns information of the model."""
+        return {
+            'backend': 'mediapipe',
+            'model': 'pose',
+            'version': mp.__version__
+        }
+
+
+# Compatibility alias
+BodyDetector = MediaPipeBodyDetector
